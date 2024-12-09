@@ -28,9 +28,6 @@ client = REMinderClient(intents=intents)
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
-    await new_func()
-
-async def new_func():
     await send_søvnråd.start()
 
 
