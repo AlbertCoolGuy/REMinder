@@ -7,6 +7,7 @@ import re
 import random
 import datetime
 import pytz
+from typing import Optional
 
 
 intents = discord.Intents.all()
@@ -27,7 +28,9 @@ client = REMinderClient(intents=intents)
 @client.event
 async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
-    await client.change_presence(status=discord.Status.online, activity=discord.Activity(name=settings.BotStatus)) 
+    await new_func()
+
+async def new_func():
     await send_søvnråd.start()
 
 
@@ -81,13 +84,18 @@ async def søvnråd(interaction: discord.Interaction):
 @client.tree.command(name='sync', description='Owner only')
 @app_commands.guilds(discord.Object(id=settings.TEST_GUILD))
 @app_commands.user_install()
-async def sync(interaction: discord.Interaction):
+async def sync(interaction: discord.Interaction, context: Optional[str] = 'guild'):
     if interaction.user.id in settings.OWNERS:
         await interaction.response.defer(ephemeral=True)
-        client.tree.copy_global_to(guild=discord.Object(settings.TEST_GUILD))
-        await client.tree.sync(guild=discord.Object(settings.TEST_GUILD))
-        print('Kommandoer synkroniseret.')
-        await interaction.followup.send("Kommandoer synkroniseret.")
+        if context == 'guild':
+            client.tree.copy_global_to(guild=discord.Object(settings.TEST_GUILD))
+            await client.tree.sync(guild=discord.Object(settings.TEST_GUILD))
+            print('Kommandoer synkroniseret.')
+            await interaction.followup.send("Kommandoer synkroniseret.", ephemeral=True)
+        elif context == 'global':
+            await client.tree.sync()
+            print('Kommandoer synkroniseret.')
+            await interaction.followup.send("Kommandoer synkroniseret.", ephemeral=True)
     else:
         await interaction.followup.send('Du skal være ejer for at kunne bruge denne kommando!', ephemeral=True)
 
